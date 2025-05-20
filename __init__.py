@@ -64,7 +64,6 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # Image upload settings 
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # maximum size of uploaded content
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif']  # supported file types
 # os.system('rm -rf ' + os.path.join(app.instance_path, 'uploads'))
 app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path, 'uploads')

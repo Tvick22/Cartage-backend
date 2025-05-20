@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  worker:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ~/.aws:/root/.aws
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
