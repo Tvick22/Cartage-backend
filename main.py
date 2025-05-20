@@ -2,6 +2,8 @@
 import json
 import os
 import ast
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from urllib.parse import urljoin, urlparse
 from flask import abort, redirect, render_template, request, send_from_directory, url_for, jsonify  # import render_template from "public" flask libraries
 from flask_login import current_user, login_user, logout_user, login_required
@@ -110,3 +112,67 @@ app.cli.add_command(custom_cli)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port="8887")
+
+app = Flask(__name__)
+CORS(app)
+
+# Config for upload folder
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# In-memory mock user data
+user = {
+    "name": "Alex Johnson",
+    "activities": ["Taking pictures", "Going to car meets", "Attending car shows"],
+    "profilePic": ""
+}
+# Upload profile picture
+@app.route('/upload-profile-pic', methods=['POST'])
+def upload_profile_pic():
+    if 'profilePic' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    file = request.files['profilePic']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+    
+    user['profilePic'] = filepath
+    return jsonify({"success": True, "path": filepath})
+
+
+# Add activity
+@app.route('/add-activity', methods=['POST'])
+def add_activity():
+    data = request.get_json()
+    activity = data.get('activity')
+    
+    if activity and activity not in user['activities']:
+        user['activities'].append(activity)
+    return jsonify(user['activities'])
+
+
+# Remove activity
+@app.route('/remove-activity', methods=['POST'])
+def remove_activity():
+    data = request.get_json()
+    activity = data.get('activity')
+    
+    user['activities'] = [a for a in user['activities'] if a != activity]
+    return jsonify(user['activities'])
+
+
+# Get user info
+@app.route('/user', methods=['GET'])
+def get_user():
+    return jsonify(user)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
+    
