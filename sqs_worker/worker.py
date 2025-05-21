@@ -11,8 +11,26 @@ from PIL import Image
 sqs = boto3.client('sqs', region_name='us-east-2')  # Replace region
 s3 = boto3.client('s3', region_name='us-east-2')
 
+MAX_WIDTH = 1024
+MAX_HEIGHT = 768
+JPEG_QUALITY = 85
+
 bucket_name = os.environ.get("AWS_S3_BUCKET_NAME", "cartage-image-upload ")
 queue_url = os.environ.get("AWS_SQS_URL", "https://sqs.us-east-2.amazonaws.com/542024879144/cartage-image-upload-queue")
+
+def resize_image(in_path, out_path, max_w=MAX_WIDTH, max_h=MAX_HEIGHT):
+    img = Image.open(in_path)
+    img.thumbnail((max_w, max_h), Image.ANTIALIAS)
+    ext = os.path.splitext(out_path)[1].lower()
+    if ext in (".jpg", ".jpeg"):
+        img.convert("RGB").save(out_path, format="JPEG", quality=JPEG_QUALITY)
+    else:
+        img.save(out_path, format="PNG", optimize=True)
+    return out_path
+
+def getExtension(filename) {
+    return os.path.splitext(filename)[1]
+}
 
 def poll_sqs():
     while True:
@@ -37,9 +55,11 @@ def poll_sqs():
                         image_db_entry._upload_status = UploadStatus.PROCESSING
                         image_db_entry.update()
                         print("Updated status.")
+                        image_path = upload_id + getExtension(image_db_entry._filename)
+                        print("Image path:", image_path)
 
                         #CHANGE IMAGE SIZE/RESOLUTION IF APPLICABLE
-
+                        resized_image = resize_image(image_path, image_path)
                         #UPLOAD IMAGE TO S3
                         
 
