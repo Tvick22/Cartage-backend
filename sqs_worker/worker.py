@@ -28,9 +28,8 @@ def resize_image(in_path, out_path, max_w=MAX_WIDTH, max_h=MAX_HEIGHT):
         img.save(out_path, format="PNG", optimize=True)
     return out_path
 
-def getExtension(filename) {
+def get_extension(filename):
     return os.path.splitext(filename)[1]
-}
 
 def poll_sqs():
     while True:
