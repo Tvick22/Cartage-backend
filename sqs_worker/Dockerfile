@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY worker.py .
 
-CMD ["python", "worker.py"]
+CMD ["python", "-u", "worker.py"]
