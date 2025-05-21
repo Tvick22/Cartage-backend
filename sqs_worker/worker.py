@@ -1,8 +1,16 @@
+import sys
+sys.path.append('/app')
 import boto3
 import time
 import os
+import json
+from model.imageUpload import UploadStatus, ImageUpload
+from __init__ import app
 
 sqs = boto3.client('sqs', region_name='us-east-2')  # Replace region
+s3 = boto3.client('s3', region_name='us-east-2')
+
+bucket_name = os.environ.get("AWS_S3_BUCKET_NAME", "cartage-image-upload ")
 queue_url = os.environ.get("AWS_SQS_URL", "https://sqs.us-east-2.amazonaws.com/542024879144/cartage-image-upload-queue")
 
 def poll_sqs():
@@ -18,14 +26,33 @@ def poll_sqs():
         if messages:
             for message in messages:
                 print("Received:", message['Body'])
+                upload_id = str(json.loads(message['Body'])["upload_id"])
+                with app.app_context():
+                    image_db_entry = ImageUpload.query.get(upload_id)
+                    if image_db_entry == None:
+                        print("Database Entry not found")
 
-                
+                    try:
+                        image_db_entry._upload_status = UploadStatus.PROCESSING
+                        image_db_entry.update()
+                        print("Updated status.")
 
-                sqs.delete_message(
-                    QueueUrl=queue_url,
-                    ReceiptHandle=message['ReceiptHandle']
-                )
-                print("Deleted message.")
+                        #CHANGE IMAGE SIZE/RESOLUTION IF APPLICABLE
+
+                        #UPLOAD IMAGE TO S3
+                        
+
+                        sqs.delete_message(
+                            QueueUrl=queue_url,
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
+                        print("Deleted message.")
+                        image_db_entry._upload_status = UploadStatus.COMPLETED
+                        image_db_entry.update()
+                    except Exception as e:
+                        print(f"Error processing message: {e}")
+                        image_db_entry._upload_status = UploadStatus.FAILED
+                        image_db_entry.update()
         else:
             print("No messages.")
 

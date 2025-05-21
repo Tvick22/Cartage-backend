@@ -16,6 +16,7 @@ class ImageUpload(db.Model):
     _filename = db.Column(db.Text, nullable=False)
     _upload_status = db.Column(db.Enum(UploadStatus), nullable=False)
     _created_at = db.Column(db.DateTime, nullable=False)
+    _uid = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def __init__(self, id, filename, uid, upload_status):
         self.id = id
