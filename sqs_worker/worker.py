@@ -1,6 +1,7 @@
 import sys
 sys.path.append('/app')
 import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
 import time
 import os
 import json
@@ -31,6 +32,23 @@ def resize_image(in_path, out_path, max_w=MAX_WIDTH, max_h=MAX_HEIGHT):
 def get_extension(filename):
     return os.path.splitext(filename)[1]
 
+def upload_file_to_s3(file_path, file_name, uid, bucket):
+    s3_key = f"/uploads/{uid}/{file_name}"
+
+    try:
+        s3.upload_file(file_path, bucket, s3_key)
+        print(f"Upload successful: {s3_key}")
+        return s3_key
+    except FileNotFoundError:
+        print("Error: The file was not found.")
+        return FileNotFoundError
+    except NoCredentialsError:
+        print("Error: AWS credentials not available.")
+        return NoCredentialsError
+    except ClientError as e:
+        print(f"Unexpected error: {e}")
+        return e
+
 def poll_sqs():
     while True:
         response = sqs.receive_message(
@@ -54,20 +72,27 @@ def poll_sqs():
                         image_db_entry._upload_status = UploadStatus.PROCESSING
                         image_db_entry.update()
                         print("Updated status.")
-                        image_path = upload_id + get_extension(image_db_entry._filename)
-                        print("Image path:", image_path)
+                        image_filename = upload_id + get_extension(image_db_entry._filename)
+                        image_path = "/app/instance/uploads/"+image_filename
 
                         #CHANGE IMAGE SIZE/RESOLUTION IF APPLICABLE
-                        resized_image = resize_image("/app/instance/uploads/"+image_path, "/app/instance/uploads/"+image_path)
+                        resized_image = resize_image(image_path, image_path)
+                        print("Resized Image")
                         #UPLOAD IMAGE TO S3
-                        
-
+                        s3_key = upload_file_to_s3(image_path, image_filename, image_db_entry._uid, bucket_name)
+                        print("Uploaded to S3")
+                        #DELETE LOCAL IMAGE FILE
+                        os.remove(image_path)
+                        print("Deleted local image")
+                        #DELETE SQS MESSAGE
                         sqs.delete_message(
                             QueueUrl=queue_url,
                             ReceiptHandle=message['ReceiptHandle']
                         )
                         print("Deleted message.")
+                        #UPDATE ENTRY STATUS
                         image_db_entry._upload_status = UploadStatus.COMPLETED
+                        image_db_entry._s3_key = s3_key
                         image_db_entry.update()
                     except Exception as e:
                         print(f"Error processing message: {e}")
