@@ -20,7 +20,7 @@ queue_url = os.environ.get("AWS_SQS_URL", "https://sqs.us-east-2.amazonaws.com/5
 
 def resize_image(in_path, out_path, max_w=MAX_WIDTH, max_h=MAX_HEIGHT):
     img = Image.open(in_path)
-    img.thumbnail((max_w, max_h), Image.ANTIALIAS)
+    img.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
     ext = os.path.splitext(out_path)[1].lower()
     if ext in (".jpg", ".jpeg"):
         img.convert("RGB").save(out_path, format="JPEG", quality=JPEG_QUALITY)
@@ -54,11 +54,11 @@ def poll_sqs():
                         image_db_entry._upload_status = UploadStatus.PROCESSING
                         image_db_entry.update()
                         print("Updated status.")
-                        image_path = upload_id + getExtension(image_db_entry._filename)
+                        image_path = upload_id + get_extension(image_db_entry._filename)
                         print("Image path:", image_path)
 
                         #CHANGE IMAGE SIZE/RESOLUTION IF APPLICABLE
-                        resized_image = resize_image(image_path, image_path)
+                        resized_image = resize_image("/app/instance/uploads/"+image_path, "/app/instance/uploads/"+image_path)
                         #UPLOAD IMAGE TO S3
                         
 
