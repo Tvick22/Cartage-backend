@@ -22,6 +22,7 @@ def default_year():
     Returns:
         int: The default year for user enrollment.
     """
+    
     current_month = date.today().month
     current_year = date.today().year
     if 7 <= current_month <= 12:
