@@ -63,7 +63,7 @@ class ImageUpload(db.Model):
         except Exception as error:
             db.session.rollback()
             raise error
-        
+        # delete func
     def delete(self):  
         try:
             db.session.delete(self)
