@@ -11,6 +11,7 @@ from __init__ import app, db
 
 """ Helper Functions """
 
+
 def default_year():
     """
     Returns the default year for user enrollment based on the current month.
