@@ -70,5 +70,6 @@ class ImageUpload(db.Model):
             db.session.commit()
         except Exception as error:
             db.session.rollback()
-            raise error
+            raise error 
+        
         
