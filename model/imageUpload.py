@@ -56,7 +56,7 @@ class ImageUpload(db.Model):
             "s3_key": self._s3_key
         }
         return data
-    
+    # update func
     def update(self):
         try:
             db.session.commit()
