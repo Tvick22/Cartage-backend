@@ -125,12 +125,19 @@ class CarPost(db.Model):
         Raises:
             Exception: An error occurred when updating the object in the database.
         """
+
         if inputs:
+
             self._car_type = inputs.get("car_type", self._car_type)
+
             self._image_url_table = inputs.get("image_url_table", self._image_url_table)
+
             self._date_posted = datetime.fromisoformat(inputs.get("date_posted", self._date_posted))
+
             self._title = inputs.get("title", self._title)
+            
             self._description = inputs.get("description", self._description)
+            
             self._uid = inputs.get("uid", self._uid)
         try:
             db.session.commit()
