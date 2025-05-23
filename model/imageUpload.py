@@ -29,7 +29,7 @@ class ImageUpload(db.Model):
 
     def __repr__(self):
         return f"ImageUpload(id={self.id}, uid={self._uid}, filename={self._filename}, upload_status={self._upload_status}, created_at={self._created_at}, s3_key={self._s3_key})"
-    
+    # create  func
     def create(self):
         try:
             db.session.add(self)
