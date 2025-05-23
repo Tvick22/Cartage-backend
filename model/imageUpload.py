@@ -37,7 +37,7 @@ class ImageUpload(db.Model):
         except Exception as error:
             db.session.rollback()
             raise error
-        
+      # read func  
     def read(self):
         user = User.query.get(self._uid)
 
