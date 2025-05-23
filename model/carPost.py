@@ -98,12 +98,14 @@ class CarPost(db.Model):
             "title": self._title,
             "description": self._description,
             "user": {
+                
                 "name": user.read()["name"],
                 "id": user.read()["id"],
                 "uid": user.read()["uid"],
                 "email": user.read()["email"],
                 "pfp": user.read()["pfp"]
             },
+
             "car_type": self._car_type,
             "image_url_table": self._image_url_table,
             "date_posted": self._date_posted
@@ -137,7 +139,7 @@ class CarPost(db.Model):
             self._title = inputs.get("title", self._title)
             
             self._description = inputs.get("description", self._description)
-            
+
             self._uid = inputs.get("uid", self._uid)
         try:
             db.session.commit()
