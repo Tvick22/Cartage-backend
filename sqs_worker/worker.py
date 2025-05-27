@@ -12,6 +12,7 @@ from PIL import Image
 sqs = boto3.client('sqs', region_name='us-east-2')  # Replace region
 s3 = boto3.client('s3', region_name='us-east-2')
 
+
 MAX_WIDTH = 1024
 MAX_HEIGHT = 768
 JPEG_QUALITY = 85
