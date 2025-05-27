@@ -1,6 +1,6 @@
 import boto3
 
-# vars
+# Vars
 bucket_name = 'kasmv2-bucket'
 local_file_path = '/Users/rachitjaiswal/Desktop/Github/kasmv2_flask/testing/testuserdata.txt'
 s3_file_path = 'users/rachit/testuserdata.txt'  # This is where you specify the location in S3
