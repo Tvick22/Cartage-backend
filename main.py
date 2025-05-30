@@ -17,6 +17,7 @@ from api.pfp import pfp_api
 from api.review_api import review_api
 from api.roads_api import roads_api
 from api.upload_image import upload_api
+from api.community_api import community_api
 
 from model.user import User, initUsers
 
@@ -26,6 +27,7 @@ app.register_blueprint(pfp_api)
 app.register_blueprint(review_api) ## /api/review
 app.register_blueprint(roads_api) ## /api/roads
 app.register_blueprint(upload_api) ## /api/upload
+app.register_blueprint(community_api)  # /api/groups
 
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
 
