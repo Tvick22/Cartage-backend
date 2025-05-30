@@ -17,7 +17,7 @@ from api.pfp import pfp_api
 from api.review_api import review_api
 from api.roads_api import roads_api
 from api.upload_image import upload_api
-from api.community_api import community_api
+from api.community import community_api
 
 from model.user import User, initUsers
 
