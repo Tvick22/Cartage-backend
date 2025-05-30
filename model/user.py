@@ -60,9 +60,10 @@ class User(db.Model, UserMixin):
     _password = db.Column(db.String(255), unique=False, nullable=False)
     _role = db.Column(db.String(20), default="User", nullable=False)
     _pfp = db.Column(db.String(255), unique=False, nullable=True)
+    _bio = db.Column(db.String(255), unique=False, nullable=True, default="")
 
 
-    def __init__(self, name, uid, password="", role="User", pfp='', email='?'):
+    def __init__(self, name, uid, password="", role="User", pfp='', email='?', bio=''):
         """
         Constructor, 1st step in object creation.
 
@@ -79,6 +80,7 @@ class User(db.Model, UserMixin):
         self.set_password(password)
         self._role = role
         self._pfp = pfp
+        self._bio = bio
 
     # UserMixin/Flask-Login requires a get_id method to return the id as a string
     def get_id(self):
@@ -329,6 +331,7 @@ class User(db.Model, UserMixin):
             "email": self.email,
             "role": self._role,
             "pfp": self._pfp,
+            "bio": self._bio
         }
         return data
 
@@ -349,6 +352,7 @@ class User(db.Model, UserMixin):
         uid = inputs.get("uid", "")
         password = inputs.get("password", "")
         pfp = inputs.get("pfp", None)
+        bio = inputs.get("bio", "")
 
         # Update table with new data
         if name:
@@ -359,6 +363,8 @@ class User(db.Model, UserMixin):
             self.set_password(password)
         if pfp is not None:
             self.pfp = pfp
+        if bio is not None:
+            self._bio = bio
 
         # Check this on each update
         self.set_email()
@@ -470,9 +476,9 @@ def initUsers():
         db.create_all()
         """Tester data for table"""
 
-        u1 = User(name='Thomas Edison', uid=app.config['ADMIN_USER'], password=app.config['ADMIN_PASSWORD'], pfp='toby.png', role="Admin")
-        u2 = User(name='Grace Hopper', uid=app.config['DEFAULT_USER'], password=app.config['DEFAULT_PASSWORD'], pfp='hop.png')
-        u3 = User(name='Nicholas Tesla', uid='niko', password='123niko', pfp='niko.png' )
+        u1 = User(name='Thomas Edison', uid=app.config['ADMIN_USER'], password=app.config['ADMIN_PASSWORD'], pfp='toby.png', role="Admin", bio="Inventor of the light bulb and phonograph.")
+        u2 = User(name='Grace Hopper', uid=app.config['DEFAULT_USER'], password=app.config['DEFAULT_PASSWORD'], pfp='hop.png', bio="Pioneer of computer programming and COBOL language.")
+        u3 = User(name='Nicholas Tesla', uid='niko', password='123niko', pfp='niko.png', bio="Inventor and electrical engineer known for his contributions to the design of the modern alternating current (AC) electricity supply system.")
         users = [u1, u2, u3]
 
         for user in users:
