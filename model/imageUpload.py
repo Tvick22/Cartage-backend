@@ -46,7 +46,7 @@ class ImageUpload(db.Model):
         data = {
             "id": self.id,
             "filename": self._filename,
-            "upload_status": self._upload_status.value,
+            "upload_status": self._upload_status,
             "user": user.read(),
             "post_id": self._post_id,
             "created_at": self._created_at,
