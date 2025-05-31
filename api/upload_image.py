@@ -24,21 +24,24 @@ def allowed_file(filename):
 def unique_filename(upload_id, filename):
     return f"{str(upload_id)}.{filename.rsplit('.', 1)[1]}"
 
-class RoadAPI:
+class UploadAPI:
     class _CRUD(Resource):
         def post(self):
-            # current_user = g.current_user
             if 'file' not in request.files:
                 return {'error': 'No file part'}, 400
 
             file = request.files['file']
+
+            post_id = request.form.get("post_id")
+
+            uid = request.form.get("uid")
 
             if file.filename == '':
                 return {'error': 'No selected file'}, 400
             
             if not allowed_file(file.filename):
                 return {'error': 'Unsupported file extension'}, 400
-            
+
             upload_id = uuid.uuid4()
 
             orginal_filename = file.filename
@@ -48,8 +51,7 @@ class RoadAPI:
             save_path = os.path.join(UPLOAD_FOLDER, file.filename)
             file.save(save_path)
 
-            db_image = ImageUpload(str(upload_id), orginal_filename, 1, UploadStatus.PENDING)
-
+            db_image = ImageUpload(str(upload_id), orginal_filename, uid, UploadStatus.PENDING, post_id)
             try:
                 db.session.add(db_image)
 
@@ -78,7 +80,4 @@ class RoadAPI:
 
             return {'message': 'Image uploaded and saved successfully'}, 200
 
-
-            
-        
     api.add_resource(_CRUD, '/upload')
