@@ -8,6 +8,7 @@ import json
 from model.imageUpload import UploadStatus, ImageUpload
 from __init__ import app
 from PIL import Image
+import mimetypes
 
 sqs = boto3.client('sqs', region_name='us-east-2')  # Replace region
 s3 = boto3.client('s3', region_name='us-east-2')
@@ -36,7 +37,7 @@ def upload_file_to_s3(file_path, file_name, uid, bucket):
     s3_key = f"/uploads/{uid}/{file_name}"
 
     try:
-        s3.upload_file(file_path, bucket, s3_key)
+        s3.upload_file(file_path, bucket, s3_key, ExtraArgs={'ContentType': mimetypes.guess_type(file_name)})
         print(f"Upload successful: {s3_key}")
         return s3_key
     except FileNotFoundError:
