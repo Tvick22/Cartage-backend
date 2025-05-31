@@ -46,11 +46,12 @@ class ImageUpload(db.Model):
         data = {
             "id": self.id,
             "filename": self._filename,
-            "upload_status": self._upload_status,
+            "upload_status": self._upload_status.value,
             "user": user.read(),
             "post_id": self._post_id,
             "created_at": self._created_at,
-            "s3_key": self._s3_key
+            "s3_key": self._s3_key,
+            "img_url": "https://cartage-image-upload.s3.us-east-2.amazonaws.com/"+str(self._s3_key)
         }
         return data
     # update func
