@@ -37,7 +37,7 @@ def upload_file_to_s3(file_path, file_name, uid, bucket):
     s3_key = f"/uploads/{uid}/{file_name}"
 
     try:
-        s3.upload_file(file_path, bucket, s3_key, ExtraArgs={'ContentType': mimetypes.guess_type(file_name)})
+        s3.upload_file(file_path, bucket, s3_key, ExtraArgs={'ContentType': mimetypes.guess_type(file_name)[0]})
         print(f"Upload successful: {s3_key}")
         return s3_key
     except FileNotFoundError:
@@ -68,6 +68,7 @@ def poll_sqs():
                     image_db_entry = ImageUpload.query.get(upload_id)
                     if image_db_entry == None:
                         print("Database Entry not found")
+                        continue
 
                     try:
                         image_db_entry._upload_status = UploadStatus.PROCESSING
