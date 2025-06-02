@@ -2,7 +2,6 @@ from datetime import datetime
 from __init__ import db
 from model.user import User
 
-# Association table for many-to-many relationship between users and communities
 community_members = db.Table('community_members',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
     db.Column('community_id', db.Integer, db.ForeignKey('communities.id'))
@@ -12,7 +11,7 @@ class Community(db.Model):
     __tablename__ = 'communities'
     id = db.Column(db.Integer, primary_key=True)
     _name = db.Column(db.String(100), nullable=False)
-    _category = db.Column(db.String(50), nullable=True)  # Replaces _period
+    _category = db.Column(db.String(50), nullable=False)
     _created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     members = db.relationship('User', secondary=community_members, backref='communities', lazy='dynamic')
@@ -24,6 +23,14 @@ class Community(db.Model):
     def __repr__(self):
         return f"<Community {self.id} {self._name}>"
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def category(self):
+        return self._category
+
     def create(self):
         db.session.add(self)
         db.session.commit()
@@ -32,14 +39,14 @@ class Community(db.Model):
         return {
             "id": self.id,
             "name": self._name,
-            "category": self._category,  # Changed from "period"
+            "category": self._category,
             "created_at": self._created_at,
             "members": [member.read() for member in self.members]
         }
 
     def update(self, data):
         self._name = data.get("name", self._name)
-        self._category = data.get("category", self._category)  # Changed from "period"
+        self._category = data.get("category", self._category)
         db.session.commit()
 
     def delete(self):
