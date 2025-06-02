@@ -196,6 +196,14 @@ class UserAPI:
                     path='/',
                     samesite='None'  # This is the key part for cross-site requests
                 )
+                resp.set_cookie(
+                    "logged_in",
+                    "1",
+                    max_age=3600,
+                    secure=False,
+                    httponly=False,
+                    path='/',
+                )
                 return resp
             except Exception as e:
                 print(e)
@@ -228,6 +236,14 @@ class UserAPI:
                     httponly=True,
                     path='/',
                     samesite='None'
+                )
+                resp.set_cookie(
+                    "logged_in",
+                    "1",
+                    max_age=0,
+                    secure=False,
+                    httponly=False,
+                    path='/',
                 )
                 return resp
             except Exception as e:
