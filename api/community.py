@@ -24,7 +24,6 @@ def get_all_communities():
             "id": c.id,
             "name": c._name,
             "category": c._category,
-            "cover_photo_url": c._cover_photo_url,
             "members": [
                 {"uid": u.uid, "name": u.name, "email": u.email}
                 for u in c.members
