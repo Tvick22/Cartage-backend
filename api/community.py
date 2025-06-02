@@ -1,44 +1,44 @@
-from flask import Blueprint, request, jsonify
-from model.community import Community
-from __init__ import db
+from flask import Blueprint, jsonify, request
+from models.community import Community
+from models.user import User
+from database import db
 
-community_api = Blueprint('community_api', __name__, url_prefix='/api/groups')
+bp = Blueprint('communities_api', __name__, url_prefix='/api/groups')
 
-@community_api.route('', methods=['GET'])
-def get_communities():
+@bp.route('', methods=['GET'])
+def get_all_communities():
     communities = Community.query.all()
-    return jsonify([c.read() for c in communities])
+    result = []
+    for c in communities:
+        result.append({
+            "id": c.id,
+            "name": c.name,
+            "category": c.category,
+            "members": [
+                {"uid": u.uid, "name": u.name, "email": u.email}
+                for u in c.members
+            ]
+        })
+    return jsonify(result)
 
-@community_api.route('', methods=['POST'])
+@bp.route('', methods=['POST'])
 def create_community():
     data = request.get_json()
     name = data.get("name")
-    period = data.get("period")
-    person_uids = data.get("personUids", [])
+    category = data.get("category")
+    personUids = data.get("personUids", [])
 
-    if not name or not period:
-        return jsonify({"error": "Missing name or period"}), 400
+    if not name or not category:
+        return jsonify({"error": "Name and category are required"}), 400
 
-    community = Community(name, period)
-    community.create()
-    community.add_members_by_uids(person_uids)
-    
-    return jsonify(community.read()), 201
+    community = Community(name=name, category=category)
 
-@community_api.route('/<int:community_id>', methods=['PUT'])
-def update_community(community_id):
-    community = Community.query.get(community_id)
-    if not community:
-        return jsonify({"error": "Community not found"}), 404
-    
-    data = request.get_json()
-    community.update(data)
-    return jsonify(community.read()), 200
+    for uid in personUids:
+        user = User.query.filter_by(uid=uid).first()
+        if user:
+            community.members.append(user)
 
-@community_api.route('/<int:community_id>', methods=['DELETE'])
-def delete_community(community_id):
-    community = Community.query.get(community_id)
-    if not community:
-        return jsonify({"error": "Community not found"}), 404
-    community.delete()
-    return jsonify({"message": "Community deleted"}), 200
+    db.session.add(community)
+    db.session.commit()
+
+    return jsonify({"message": "Community created", "id": community.id}), 201

@@ -12,14 +12,14 @@ class Community(db.Model):
     __tablename__ = 'communities'
     id = db.Column(db.Integer, primary_key=True)
     _name = db.Column(db.String(100), nullable=False)
-    _period = db.Column(db.String(50), nullable=True)
+    _category = db.Column(db.String(50), nullable=True)  # Replaces _period
     _created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     members = db.relationship('User', secondary=community_members, backref='communities', lazy='dynamic')
 
-    def __init__(self, name, period):
+    def __init__(self, name, category):
         self._name = name
-        self._period = period
+        self._category = category
 
     def __repr__(self):
         return f"<Community {self.id} {self._name}>"
@@ -32,14 +32,14 @@ class Community(db.Model):
         return {
             "id": self.id,
             "name": self._name,
-            "period": self._period,
+            "category": self._category,  # Changed from "period"
             "created_at": self._created_at,
             "members": [member.read() for member in self.members]
         }
 
     def update(self, data):
         self._name = data.get("name", self._name)
-        self._period = data.get("period", self._period)
+        self._category = data.get("category", self._category)  # Changed from "period"
         db.session.commit()
 
     def delete(self):
