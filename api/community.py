@@ -7,19 +7,31 @@ communities_api = Blueprint('communities_api', __name__, url_prefix='/api/groups
 
 @communities_api.route('', methods=['GET'])
 def get_all_communities():
-    communities = Community.query.all()
+    search = request.args.get('search', '', type=str)
+    category = request.args.get('category', '', type=str)
+
+    query = Community.query
+
+    if search:
+        query = query.filter(Community._name.ilike(f'%{search}%'))
+    if category:
+        query = query.filter_by(_category=category)
+
+    communities = query.all()
     result = []
     for c in communities:
         result.append({
             "id": c.id,
-            "name": c.name,        # Uses property getter now
-            "category": c.category,  # Uses property getter now
+            "name": c._name,
+            "category": c._category,
+            "cover_photo_url": c._cover_photo_url,
             "members": [
                 {"uid": u.uid, "name": u.name, "email": u.email}
                 for u in c.members
             ]
         })
     return jsonify(result)
+
 
 @communities_api.route('', methods=['POST'])
 def create_community():
