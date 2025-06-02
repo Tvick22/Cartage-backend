@@ -78,6 +78,9 @@ class UploadAPI:
                 db.session.rollback()
                 raise error
 
-            return {'message': 'Image uploaded and saved successfully'}, 200
+            return {
+                'message': 'Image uploaded and saved successfully',
+                'UUID': str(upload_id)
+                }, 200
 
     api.add_resource(_CRUD, '/upload')
