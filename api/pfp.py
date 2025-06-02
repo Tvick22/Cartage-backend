@@ -3,8 +3,9 @@ from flask_restful import Api, Resource
 from api.jwt_authorize import token_required
 from model.user import User
 from model.pfp import pfp_base64_decode, pfp_base64_upload, pfp_file_delete
+from model.imageUpload import ImageUpload
 
-pfp_api = Blueprint('pfp_api', __name__, url_prefix='/api/id')
+pfp_api = Blueprint('pfp_api', __name__, url_prefix='/api')
 api = Api(pfp_api)
 
 class _PFP(Resource):
@@ -30,12 +31,13 @@ class _PFP(Resource):
     @token_required()
     def get(self):
         current_user = g.current_user
+        pfp = ImageUpload.query.get(current_user._pfp)
+
+        if not pfp._s3_key:
+            return {'message': 'Profile picture is not uploaded.'}, 404
 
         if current_user.pfp:
-            base64_encode = pfp_base64_decode(current_user.uid, current_user.pfp)
-            if not base64_encode:
-                return {'message': 'An error occurred while reading the profile picture.'}, 500
-            return {'pfp': base64_encode}, 200
+            return {'pfp': "https://cartage-image-upload.s3.us-east-2.amazonaws.com/"+str(pfp._s3_key)}, 200
         else:
             return {'message': 'Profile picture is not set.'}, 404
 
@@ -91,39 +93,16 @@ class _PFP(Resource):
 
     @token_required()
     def put(self):
-        """
-        Updates the user's profile picture with a new image provided as base64 encoded data.
-
-        This endpoint allows users to update their profile picture by sending a PUT request with base64 encoded image data.
-        The image is decoded and saved to a secure location on the server, and the user's profile information is updated
-        to reference the new image file.
-
-        The function requires a valid authentication token and expects the base64 image data to be included in the request's JSON body
-        under the key 'pfp'. If the image data is not provided, or if any error occurs during the upload process or while updating
-        the user's profile in the database, an appropriate error message and status code are returned.
-
-        Returns:
-        - A JSON object with a message indicating the success or failure of the operation.
-        - HTTP status code 200 if the profile picture was updated successfully.
-        - HTTP status code 400 if the base64 image data is missing from the request.
-        - HTTP status code 500 if an error occurs during the upload process or while updating the database.
-        """
         current_user = g.current_user
 
-        # Obtain the base64 image data from the request
-        if 'pfp' not in request.json:
-            return {'message': 'Base64 image data required.'}, 400
-        base64_image = request.json['pfp']
-       
-        # Make an image file from the base64 data 
-        filename = pfp_base64_upload(base64_image, current_user.uid)
-        if not filename:
-            return {'message': 'An error occurred while uploading the profile picture'}, 500
-        
+        if 'image_uuid' not in request.json:
+            return {'message': 'S3 Key required.'}, 400
+        image_uuid = request.json['image_uuid']
+    
         # Update the user's profile picture to the uploaded file
         try:
             # write the filename reference to the database
-            current_user.update({"pfp": filename})
+            current_user.update({"pfp": image_uuid})
             return {'message': 'Profile picture updated successfully'}, 200
         except Exception as e:
             return {'message': f'A database error occurred while assigning profile picture: {str(e)}'}, 500
