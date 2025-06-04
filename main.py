@@ -119,4 +119,4 @@ def restore_data_command():
 app.cli.add_command(custom_cli)
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port="8104")
+    app.run(debug=True, host="0.0.0.0", port="4200")
