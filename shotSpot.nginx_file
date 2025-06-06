@@ -10,7 +10,7 @@ server {
 
 server {
     listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen [::]:443;
     server_name shotspot.opencodingsociety.com;
 
     ssl_certificate /etc/letsencrypt/live/shotspot.opencodingsociety.com/fullchain.pem;
