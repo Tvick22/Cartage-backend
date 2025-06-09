@@ -5,6 +5,25 @@ server {
 
     client_max_body_size 50M;
 
+    location / {
+        proxy_pass http://localhost:4200;
+
+        add_header "Access-Control-Allow-Credentials" "true" always;
+        add_header "Access-Control-Allow-Origin"  "https://tvick22.github.io" always;
+        add_header "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS, HEAD" always;
+        add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Origin, X-Requested-With, Content-Type, Accept" always;
+    }
+
+    # Handle preflight OPTIONS requests
+    if ($request_method = OPTIONS) {
+        add_header "Access-Control-Allow-Origin" "https://tvick22.github.io" always;
+        add_header "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS, HEAD" always;
+        add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Origin, X-Requested-With, Content-Type, Accept" always;
+        add_header "Access-Control-Allow-Credentials" "true" always;
+        add_header "Access-Control-Max-Age" 600 always;
+        return 204;
+    }
+
     return 301 https://$host$request_uri;
 }
 
@@ -25,13 +44,18 @@ server {
     location / {
         proxy_pass http://localhost:4200;
 
-        # Preflighted requests
-        if ($request_method = OPTIONS) {
-            add_header "Access-Control-Allow-Credentials" "true" always;
-            add_header "Access-Control-Allow-Origin"  "https://tvick22.github.io" always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS, HEAD" always;
-            add_header "Access-Control-Allow-MaxAge" 600 always;
-            add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Origin, X-Requested-With, Content-Type, Accept" always;
-        }
+        add_header "Access-Control-Allow-Credentials" "true" always;
+        add_header "Access-Control-Allow-Origin"  "https://tvick22.github.io" always;
+        add_header "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS, HEAD" always;
+        add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Origin, X-Requested-With, Content-Type, Accept" always;
+    }
+
+    if ($request_method = OPTIONS) {
+        add_header "Access-Control-Allow-Origin" "https://tvick22.github.io" always;
+        add_header "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS, HEAD" always;
+        add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Origin, X-Requested-With, Content-Type, Accept" always;
+        add_header "Access-Control-Allow-Credentials" "true" always;
+        add_header "Access-Control-Max-Age" 600 always;
+        return 204;
     }
 }
